@@ -1,0 +1,8 @@
+Swagger may not display streaming very nicely, so the easiest test is with curl.
+
+curl -N -X POST \
+  http://localhost:8000/api/tickets/7/stream-reply \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+  sample token 
+  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2IiwiZXhwIjoxNzg4NTE0ODUyfQ.zD6rjiA1CmSHTNrRL_wAbbJf8IMksZI6AKeZqOZiBqU

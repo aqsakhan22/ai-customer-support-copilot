@@ -1,0 +1,178 @@
+.app-shell {
+  min-height: 100vh;
+  background: #f6f8fb;
+}
+
+.app-header {
+  height: 76px;
+  padding: 0 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 250px;
+}
+
+.app-brand-icon {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background: #111827;
+  color: #ffffff;
+
+  font-size: 21px;
+}
+
+.app-brand h1 {
+  margin: 0;
+
+  font-size: 18px;
+  font-weight: 700;
+
+  color: #111827;
+}
+
+.app-brand span {
+  display: block;
+  margin-top: 2px;
+
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.app-navigation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 16px;
+
+  border: none;
+  border-radius: 9px;
+
+  background: transparent;
+  color: #6b7280;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.nav-button:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.nav-button.active {
+  background: #111827;
+  color: #ffffff;
+}
+
+.nav-button span {
+  font-size: 15px;
+}
+
+.logout-button {
+  padding: 9px 15px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #374151;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.logout-button:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.app-content {
+  min-height: calc(100vh - 76px);
+}
+
+@media (max-width: 800px) {
+  .app-header {
+    height: auto;
+    min-height: 76px;
+
+    padding: 14px 18px;
+
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .app-brand {
+    min-width: auto;
+  }
+
+  .app-navigation {
+    order: 3;
+    width: 100%;
+
+    justify-content: center;
+  }
+
+  .nav-button {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 500px) {
+  .app-brand span {
+    display: none;
+  }
+
+  .app-brand h1 {
+    font-size: 16px;
+  }
+
+  .logout-button {
+    padding: 8px 11px;
+  }
+
+  .nav-button {
+    padding: 9px 8px;
+    font-size: 12px;
+  }
+}

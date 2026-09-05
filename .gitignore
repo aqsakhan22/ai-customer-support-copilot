@@ -1,0 +1,23 @@
+# Environment variables
+backend/.env
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# ChromaDB
+backend/chroma_db/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+#HIDE FILES
+Dockerfile
+.dockerignore

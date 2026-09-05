@@ -1,0 +1,35 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+python-dotenv
+# autientication packages
+#pip uninstall bcrypt passlib -y
+# pip install bcrypt==4.0.1
+# pip install passlib==1.7.4
+python-jose[cryptography]
+# passlib[bcrypt]
+bcrypt==4.0.1
+passlib==1.7.4
+email-validator
+
+# GROQ
+langchain
+langchain-groq
+
+# RAG
+langchain-huggingface
+sentence-transformers
+chromadb
+langchain-chroma
+langchain-community
+# RAG MULTIPLE DOCS
+pypdf
+pandas
+#Word/DOCX dependency
+docx2txt
+python-docx
+
+
+# FastAPI needs python-multipart to receive files through multipart/form-data.
+python-multipart

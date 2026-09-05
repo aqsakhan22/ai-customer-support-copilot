@@ -1,0 +1,17 @@
+pip install pytest httpx
+backend/
+├── app/
+├── tests/
+│   └── test_api.py
+├── .env
+├── requirements.txt
+
+Step 4 — Run the tests
+
+From the backend folder:
+
+pytest -v
+
+pytest -v tests/test_ai_evaluation.py
+
+
