@@ -9,9 +9,11 @@ from langchain_text_splitters import (
 
 from langchain_chroma import Chroma
 
-from app.services.embedding_service import (
-    embeddings
-)
+# from app.services.embedding_service import (
+#     embeddings
+# )
+
+from app.services.embedding_service import get_embeddings
 
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -65,7 +67,7 @@ def create_vector_store():
 
     vector_store = Chroma.from_documents(
         documents=chunks,
-        embedding=embeddings,
+        embedding=get_embeddings(),
         persist_directory=str(
             VECTOR_DB_DIR
         )
@@ -79,7 +81,7 @@ def get_vector_store():
         persist_directory=str(
             VECTOR_DB_DIR
         ),
-        embedding_function=embeddings
+        embedding_function=get_embeddings()
     )
 
 def get_retriever():
