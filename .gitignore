@@ -21,3 +21,5 @@ frontend/dist/
 #HIDE FILES
 Dockerfile
 .dockerignore
+
+deployment.txt
