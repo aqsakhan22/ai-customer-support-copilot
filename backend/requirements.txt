@@ -20,8 +20,8 @@ langchain-groq
 # RAG
 langchain-huggingface
 sentence-transformers
-chromadb
-langchain-chroma
+# chromadb
+# langchain-chroma
 langchain-community
 # RAG MULTIPLE DOCS
 pypdf
