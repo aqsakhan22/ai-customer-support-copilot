@@ -4,3 +4,4 @@ from app.models.ai_analysis import AIAnalysis
 from app.models.ai_source import AISource
 from app.models.customer import Customer
 from app.models.ticket_message import TicketMessage
+from app.models.knowledge_embedding import KnowledgeEmbedding

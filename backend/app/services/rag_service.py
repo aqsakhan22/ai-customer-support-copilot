@@ -6,18 +6,21 @@ from langchain_community.document_loaders import (
     PyPDFLoader,
     Docx2txtLoader,
     CSVLoader,
-
 )
 
 from langchain_text_splitters import (
     RecursiveCharacterTextSplitter
 )
 
-from langchain_chroma import Chroma
+# from sqlalchemy import select, delete
 
-# from app.services.embedding_service import embeddings
+from app.database.connection import SessionLocal
+from app.models.knowledge_embedding import KnowledgeEmbedding
+
 from app.services.embedding_service import get_embeddings
 
+
+from app.config import settings
 
 # --------------------------------------------------
 # Paths
@@ -27,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 
 KNOWLEDGE_BASE_DIR = BASE_DIR / "knowledge_base"
 
-VECTOR_DB_DIR = BASE_DIR / "chroma_db"
+
 
 
 # --------------------------------------------------
@@ -162,93 +165,86 @@ def load_documents():
 def process_single_file(
     file_path: Path
 ):
-
     # ==========================================
     # 1. Calculate file hash
     # ==========================================
 
-    file_hash = calculate_file_hash(
-        file_path
-    )
-
+    file_hash = calculate_file_hash(file_path)
 
     # ==========================================
     # 2. Check duplicate
     # ==========================================
 
     if document_exists(file_hash):
-
         raise ValueError(
-            "This document has already "
-            "been uploaded."
+            "This document has already been uploaded."
         )
-
 
     # ==========================================
     # 3. Load document
     # ==========================================
 
-    documents = load_single_document(
-        file_path
-    )
+    documents = load_single_document(file_path)
 
     if not documents:
-
         raise ValueError(
             "Could not load document."
         )
-
 
     # ==========================================
     # 4. Add metadata
     # ==========================================
 
     for document in documents:
-
-        document.metadata[
-            "filename"
-        ] = file_path.name
-
-        document.metadata[
-            "source_filename"
-        ] = file_path.name
-
-        document.metadata[
-            "file_hash"
-        ] = file_hash
-
+        document.metadata["filename"] = file_path.name
+        document.metadata["source_filename"] = file_path.name
+        document.metadata["file_hash"] = file_hash
 
     # ==========================================
     # 5. Split into chunks
     # ==========================================
 
-    chunks = split_documents(
-        documents
+    chunks = split_documents(documents)
+
+    # ==========================================
+    # 6. Generate embeddings
+    # ==========================================
+
+    embedding_model = get_embeddings()
+
+    embeddings = embedding_model.embed_documents(
+        [chunk.page_content for chunk in chunks]
     )
 
-
     # ==========================================
-    # 6. Save to ChromaDB
+    # 7. Save to PostgreSQL + pgvector
     # ==========================================
 
-    if VECTOR_DB_DIR.exists():
+    db = SessionLocal()
 
-        vector_store = get_vector_store()
+    try:
+        for chunk, embedding in zip(chunks, embeddings):
 
-        vector_store.add_documents(
-            chunks
-        )
-
-    else:
-
-        Chroma.from_documents(
-            documents=chunks,
-            embedding=get_embeddings(),
-            persist_directory=str(
-                VECTOR_DB_DIR
+            db_embedding = KnowledgeEmbedding(
+                content=chunk.page_content,
+                chunk_metadata=chunk.metadata,
+                embedding=embedding
             )
-        )
 
+            db.add(db_embedding)
+
+        db.commit()
+
+    except Exception:
+        db.rollback()
+        raise
+
+    finally:
+        db.close()
+
+    print(
+        f"Saved {len(chunks)} chunks to PostgreSQL."
+    )
 
     return len(chunks)
 
@@ -274,137 +270,6 @@ def split_documents(documents):
 
     return chunks
 
-
-# --------------------------------------------------
-# Create vector database
-# --------------------------------------------------
-
-def create_vector_store():
-
-    documents = load_documents()
-
-    if not documents:
-
-        raise ValueError(
-            "No supported documents found "
-            "in knowledge_base."
-        )
-
-    chunks = split_documents(
-        documents
-    )
-
-    vector_store = Chroma.from_documents(
-        documents=chunks,
-        embedding=get_embeddings(),
-        persist_directory=str(
-            VECTOR_DB_DIR
-        )
-    )
-
-    print(
-        "Vector database created successfully."
-    )
-
-    return vector_store
-
-
-# --------------------------------------------------
-# Get existing vector database
-# --------------------------------------------------
-
-def get_vector_store():
-
-    if not VECTOR_DB_DIR.exists():
-
-        raise ValueError(
-            "Knowledge Base vector database "
-            "does not exist yet. "
-            "Please upload a document first."
-        )
-
-
-    return Chroma(
-        persist_directory=str(
-            VECTOR_DB_DIR
-        ),
-        embedding_function=get_embeddings()
-    )
-
-# --------------------------------------------------
-# Create retriever
-# --------------------------------------------------
-
-def get_retriever():
-
-    vector_store = get_vector_store()
-
-    return vector_store.as_retriever(
-        search_kwargs={
-            "k": 3
-        }
-    )
-
-
-# --------------------------------------------------
-# Search knowledge base
-# --------------------------------------------------
-# User ticket
-#      ↓
-# search_knowledge_base()
-#      ↓
-# ChromaDB
-#      ↓
-# Top 4 relevant chunks
-
-def search_knowledge_base(
-    query: str,
-    k: int = 4
-):
-
-    vector_store = get_vector_store()
-
-    results = vector_store.similarity_search(
-        query,
-        k=k
-    )
-
-    return results
-
-# --------------------------------------------------
-# Delete retriever
-# --------------------------------------------------
-
-def delete_document_from_vector_store(
-    filename: str
-):
-
-    vector_store = get_vector_store()
-
-
-    results = vector_store.get(
-        where={
-            "source_filename": filename
-        }
-    )
-
-
-    ids = results.get(
-        "ids",
-        []
-    )
-
-
-    if ids:
-
-        vector_store.delete(
-            ids=ids
-        )
-
-
-    return len(ids)
-
-#
 
 # search_knowledge_base()
 #         ↓
@@ -458,6 +323,7 @@ def get_rag_context(
     )
 
 
+
 # it will return source
 def get_rag_sources(
     query: str,
@@ -493,8 +359,6 @@ def get_rag_sources(
 
 
     return sources
-
-
 
 def get_rag_context_and_sources(
     query: str,
@@ -571,6 +435,102 @@ def get_rag_context_and_sources(
         "sources": sources
     }
 
+
+# --------------------------------------------------
+# PostgreSQL vector search
+# --------------------------------------------------
+
+def search_knowledge_base(
+    query: str,
+    k: int = 4
+):
+    embedding_model = get_embeddings()
+
+    query_embedding = embedding_model.embed_query(query)
+
+    db = SessionLocal()
+
+    try:
+        results = (
+            db.query(KnowledgeEmbedding)
+            .filter(
+                KnowledgeEmbedding.embedding.isnot(None)
+            )
+            .order_by(
+                KnowledgeEmbedding.embedding.cosine_distance(
+                    query_embedding
+                )
+            )
+            .limit(k)
+            .all()
+        )
+
+        return [
+            embedding_to_document(item)
+            for item in results
+        ]
+
+    finally:
+        db.close()
+
+
+# --------------------------------------------------
+# PostgreSQL DELETE vector search
+# --------------------------------------------------
+
+def delete_document_from_vector_store(
+    filename: str
+):
+    db = SessionLocal()
+
+    try:
+        result = (
+            db.query(KnowledgeEmbedding)
+            .filter(
+                KnowledgeEmbedding.chunk_metadata[
+                    "source_filename"
+                ].as_string() == filename
+            )
+            .delete(
+                synchronize_session=False
+            )
+        )
+
+        db.commit()
+
+        return result
+
+    except Exception:
+        db.rollback()
+        raise
+
+    finally:
+        db.close()
+
+
+
+def document_exists(
+    file_hash: str
+) -> bool:
+
+    db = SessionLocal()
+
+    try:
+        result = (
+            db.query(KnowledgeEmbedding.id)
+            .filter(
+                KnowledgeEmbedding.chunk_metadata[
+                    "file_hash"
+                ].as_string() == file_hash
+            )
+            .first()
+        )
+
+        return result is not None
+
+    finally:
+        db.close()
+
 #twice, your code can add the same chunks to ChromaDB twice.
 
 # We'll fix that using a SHA-256 file hash.
@@ -593,31 +553,109 @@ def calculate_file_hash(
 
     return sha256.hexdigest()
 
+def embedding_to_document(embedding):
+    from langchain_core.documents import Document
 
-
-def document_exists(
-    file_hash: str
-) -> bool:
-
-    if not VECTOR_DB_DIR.exists():
-
-        return False
-
-    vector_store = get_vector_store()
-
-    results = vector_store.get(
-        where={
-            "file_hash": file_hash
-        },
-        limit=1
+    return Document(
+        page_content=embedding.content,
+        metadata=embedding.chunk_metadata or {}
     )
 
-    ids = results.get(
-        "ids",
-        []
+
+
+# --------------------------------------------------
+# Generate AI answer from RAG context
+# --------------------------------------------------
+
+def generate_rag_answer(
+    query: str,
+    k: int = 4
+):
+    from langchain_groq import ChatGroq
+    from langchain_core.messages import HumanMessage
+
+    rag_data = get_rag_context_and_sources(
+        query,
+        k=k
     )
 
-    return len(ids) > 0
+    context = rag_data["context"]
+    sources = rag_data["sources"]
+
+    if not context:
+        return {
+            "answer": (
+                "I couldn't find relevant information "
+                "in the knowledge base to answer your question."
+            ),
+            "sources": []
+        }
+
+    llm = ChatGroq(
+        api_key=settings.GROQ_API_KEY,
+        model=settings.GROQ_MODEL,
+        temperature=0
+    )
+
+    prompt = f"""
+You are an AI customer support assistant.
+
+Answer the user's question using ONLY the information
+provided in the knowledge base context below.
+
+IMPORTANT RULES:
+
+1. Do not invent information.
+2. Do not use outside knowledge.
+3. Preserve dates, numbers, limits, conditions,
+   prices, time periods, and policies exactly as
+   stated in the context.
+4. If the answer cannot be found in the context,
+   clearly say that the information is not available
+   in the knowledge base.
+5. Write a professional, helpful customer-support answer.
+6. Use Markdown formatting when it improves readability.
+7. You may use:
+   - headings
+   - bullet points
+   - numbered lists
+   - Markdown tables
+   - bold text
+8. Do not mention embeddings, pgvector, retrieval,
+   chunks, vector databases, or internal system details.
+9. Do not make claims that are not supported by the
+   provided context.
+
+USER QUESTION:
+{query}
+
+KNOWLEDGE BASE CONTEXT:
+{context}
+
+Now provide the best answer to the user.
+"""
+
+    response = llm.invoke(
+        [
+            HumanMessage(content=prompt)
+        ]
+    )
+
+    return {
+        "answer": response.content,
+        "sources": sources
+    }
+
+
+
+
+
+
+
+
+
+
+
 # --------------------------------------------------
 # Test
 # --------------------------------------------------

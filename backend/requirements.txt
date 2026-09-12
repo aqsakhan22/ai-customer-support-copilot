@@ -33,3 +33,8 @@ python-docx
 
 # FastAPI needs python-multipart to receive files through multipart/form-data.
 python-multipart
+pgvector
+
+#
+huggingface_hub
+
