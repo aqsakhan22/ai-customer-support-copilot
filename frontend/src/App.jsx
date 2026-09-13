@@ -15,7 +15,7 @@ import Dashboard from "./pages/Dashboard";
 import Tickets from "./pages/Tickets";
 import TicketDetail from "./pages/TicketDetails";
 // import KnowledgeBase from "./pages/KnowledgeBase";
-import KnowledgeBase from "./pages/Knowledge_Assistant_chat";
+import KnowledgeBase from "./pages/KnowledgeBase";
 import Analytics from "./pages/Analytics";
 
 import "./styles/app.css";
