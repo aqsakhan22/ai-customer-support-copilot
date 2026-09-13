@@ -30,7 +30,8 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173"
+        "http://localhost:5173",
+        "https://ai-customer-support-copilot.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
