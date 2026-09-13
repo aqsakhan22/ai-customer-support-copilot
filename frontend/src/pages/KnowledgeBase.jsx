@@ -13,8 +13,7 @@ import
   getDocuments,
   deleteDocument,
 } 
-from "../services/KnowledgeService";
-
+from '../services/knowledgeService'
 
 
 
