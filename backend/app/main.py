@@ -32,7 +32,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         
-        "https://ai-customer-support-copilot-tan.vercel.app/",
+        "https://ai-customer-support-copilot-tan.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
