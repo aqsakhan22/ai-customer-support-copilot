@@ -31,7 +31,6 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        
         "https://ai-customer-support-copilot-tan.vercel.app",
         "https://ai-customer-support-copilot-sandy.vercel.app"
     ],
@@ -39,6 +38,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+
 
 
 app.include_router(ticket_router)
