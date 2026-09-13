@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# REACT SIDE
+node_modules/
+dist/
+.env
+.env.local
+old_files/
