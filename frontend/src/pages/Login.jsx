@@ -8,6 +8,7 @@ function Login({ onLogin ,onRegister}) {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+const API_URL = import.meta.env.VITE_API_URL;
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -22,7 +23,8 @@ function Login({ onLogin ,onRegister}) {
 
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/api/auth/login",
+        `${API_URL}/api/auth/login`,
+      
         {
           method: "POST",
 

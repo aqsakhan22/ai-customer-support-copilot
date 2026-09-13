@@ -118,7 +118,7 @@ export async function chatWithKnowledgeBase(question) {
 
 
     const response = await fetch(
-        "http://127.0.0.1:8000/api/ai/chat",
+        `${API_URL}/api/ai/chat`,
         {
             method: "POST",
 

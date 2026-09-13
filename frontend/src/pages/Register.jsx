@@ -19,8 +19,9 @@ function Register({ onRegister }) {
     setLoading(true);
 
     try {
+      const API_URL = import.meta.env.VITE_API_URL;
       const response = await fetch(
-        "http://127.0.0.1:8000/api/auth/register",
+        `${API_URL}/api/auth/register`,
         {
           method: "POST",
 
