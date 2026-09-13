@@ -22,7 +22,9 @@ from functools import lru_cache
 
 from huggingface_hub import InferenceClient
 from langchain_core.embeddings import Embeddings
+from dotenv import load_dotenv
 
+load_dotenv()
 
 class HuggingFaceAPIEmbeddings(Embeddings):
 
