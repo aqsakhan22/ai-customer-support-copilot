@@ -23,3 +23,10 @@ Dockerfile
 .dockerignore
 
 deployment.txt
+
+# REACT SIDE
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/old_files/

@@ -4,14 +4,16 @@ import {
   useRef,
 } from "react";
 import { chatWithKnowledgeBase } from "../services/aiService";
-import "../styles/knowledgeBase.css";
+import "../styles/KnowledgeBase.css";
 
 
-import {
+import 
+{
   uploadDocument,
   getDocuments,
   deleteDocument,
-} from "../services/KnowledgeService";
+} 
+from "../services/KnowledgeService";
 
 
 
