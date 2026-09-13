@@ -19,7 +19,7 @@ langchain-groq
 
 # RAG
 langchain-huggingface
-sentence-transformers
+# sentence-transformers
 # chromadb
 # langchain-chroma
 langchain-community
